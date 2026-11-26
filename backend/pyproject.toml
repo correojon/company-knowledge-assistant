@@ -1,0 +1,40 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "correojon", email = "correojon@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.20.1",
+    "beautifulsoup4>=4.15.0",
+    "fastapi>=0.165.0",
+    "fastembed>=0.9.1",
+    "httpx>=0.28.1",
+    "markdown-it-py>=4.3.0",
+    "pydantic-settings>=2.16.3",
+    "pymupdf>=2.1",
+    "pymupdf4llm>=2.1",
+    "python-docx>=1.2.0",
+    "python-multipart>=0.0.34",
+    "sqlite-vec>=0.1.9",
+    "sqlmodel>=0.0.50",
+    "sse-starlette>=3.7.1",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[project.scripts]
+backend = "backend:main"
+
+[build-system]
+requires = ["uv_build>=0.13.10,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.5.0",
+    "ruff>=0.17.6",
+]
