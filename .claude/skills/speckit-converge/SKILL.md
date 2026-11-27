@@ -6,6 +6,8 @@ metadata:
   author: "github-spec-kit"
   source: "templates/commands/converge.md"
   version: "1.4.6.dev0"
+user-invocable: true
+disable-model-invocation: false
 ---
 
 
