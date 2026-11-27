@@ -194,7 +194,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   - `Settings(_env_file=<.env.example>)` equals `Settings(_env_file=None)` on every field except `config_file_loaded`, which is `True`.
 
   **Implement**: rewrite .env.example per contracts/configuration.md. `CONFIG_FILE_LOADED=true` comes first, and each key gets a one-line `#` comment above it.
-- [ ] T018 [US1] OpenAPI export and generated frontend types (FR-016, research.md R10). **Test first**, in backend/tests/unit/test_export_openapi.py:
+- [X] T018 [US1] OpenAPI export and generated frontend types (FR-016, research.md R10). **Test first**, in backend/tests/unit/test_export_openapi.py:
   - `export_openapi.main([str(tmp_path / "a.json")])` run twice gives byte-identical files that end in `\n`, use sorted keys and contain `components.schemas.HealthReport`.
   - Export still succeeds when `app.config.ENV_FILE` points to a file containing `LLM_PROVIDER=banana`, because the schema must not depend on local configuration. This test passes on its first run and becomes a regression guard once T027 rejects `banana`.
 
