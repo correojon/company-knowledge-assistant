@@ -1,0 +1,32 @@
+# Start the app: docker compose up --build
+# Bundled local model (opt-in): docker compose -f compose.yml -f compose.ollama.yml up --build
+services:
+  backend:
+    build: ./backend
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # These override .env: inside the container, data lives on the volume and
+      # a host Ollama is reached through the host gateway (research.md R3).
+      DATA_DIR: /data
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - app-data:/data
+
+  frontend:
+    build: ./frontend
+    environment:
+      API_PROXY_TARGET: http://backend:8000
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  app-data:

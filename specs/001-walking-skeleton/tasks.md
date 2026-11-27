@@ -240,7 +240,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
 
   Verify: `docker build -t cka-backend backend`, then `docker run -p 8000:8000 -e LLM_PROVIDER=fake cka-backend`. `curl localhost:8000/api/health` shows `vector_search: ok` (US1-3 in a container). Record the first build time. If it exceeds about 6 min, apply the R15 fallback.
 - [X] T024 [P] [US1] Frontend container: frontend/Dockerfile and frontend/.dockerignore (research.md R15). Use `node:26-slim`, copy package.json and package-lock.json, run `npm ci`, copy the source and run `npm run build`. Set `CMD ["npm","run","preview","--","--host","0.0.0.0","--port","5173"]`. .dockerignore excludes `node_modules`, `dist`, `.env`. Verify: `docker build frontend` succeeds.
-- [ ] T025 [US1] compose.yml at the repository root (FR-001, FR-002, FR-007, research.md R1 and R3).
+- [X] T025 [US1] compose.yml at the repository root (FR-001, FR-002, FR-007, research.md R1 and R3).
   - `backend` service:
     - `build: ./backend`, with `env_file: [{path: .env, required: false}]`.
     - `environment`: `DATA_DIR=/data` and `OLLAMA_BASE_URL=http://host.docker.internal:11434`.
