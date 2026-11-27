@@ -61,7 +61,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Network guard for all backend tests (US3-1, FR-014, research.md R11). **Test first**: in backend/tests/unit/test_network_guard.py, assert that `socket.create_connection(("127.0.0.1", 9))` and `socket.socket().connect(("127.0.0.1", 9))` both raise `NetworkBlockedError`, and that the message names the target address. **Implement** an autouse fixture in backend/tests/conftest.py that:
+- [X] T004 Network guard for all backend tests (US3-1, FR-014, research.md R11). **Test first**: in backend/tests/unit/test_network_guard.py, assert that `socket.create_connection(("127.0.0.1", 9))` and `socket.socket().connect(("127.0.0.1", 9))` both raise `NetworkBlockedError`, and that the message names the target address. **Implement** an autouse fixture in backend/tests/conftest.py that:
   - monkeypatches `socket.socket.connect` and `socket.create_connection` to raise `NetworkBlockedError` (defined in conftest.py);
   - deletes every key in contracts/configuration.md from `os.environ`;
   - sets `LLM_PROVIDER=fake` and `DATA_DIR=<tmp_path>/data`.
