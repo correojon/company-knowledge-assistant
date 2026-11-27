@@ -65,7 +65,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   - monkeypatches `socket.socket.connect` and `socket.create_connection` to raise `NetworkBlockedError` (defined in conftest.py);
   - deletes every key in contracts/configuration.md from `os.environ`;
   - sets `LLM_PROVIDER=fake` and `DATA_DIR=<tmp_path>/data`.
-- [ ] T005 Settings model in backend/app/config.py, covering data-model.md Settings.llm_provider, Settings.ollama_base_url, Settings.ollama_model, Settings.openai_compat_base_url, Settings.openai_compat_api_key, Settings.openai_compat_model, Settings.llm_timeout_seconds, Settings.embedding_model, Settings.data_dir and Settings.config_file_loaded, plus the derived `database_path` (research.md R4, R5).
+- [X] T005 Settings model in backend/app/config.py, covering data-model.md Settings.llm_provider, Settings.ollama_base_url, Settings.ollama_model, Settings.openai_compat_base_url, Settings.openai_compat_api_key, Settings.openai_compat_model, Settings.llm_timeout_seconds, Settings.embedding_model, Settings.data_dir and Settings.config_file_loaded, plus the derived `database_path` (research.md R4, R5).
 
   **Test first**, in backend/tests/unit/test_config.py:
   - Every default matches data-model.md, and `database_path == data_dir / "knowledge.sqlite3"`.

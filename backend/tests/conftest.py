@@ -75,4 +75,10 @@ def _offline_test_environment(
     monkeypatch.setenv("LLM_PROVIDER", "fake")
     monkeypatch.setenv("DATA_DIR", str(tmp_path / "data"))
 
+    # Never read the developer's .env. Imported here so the guard above is already in
+    # place if importing app code ever has side effects.
+    from app import config
+
+    monkeypatch.setattr(config, "ENV_FILE", tmp_path / "no-such-dir" / ".env")
+
     yield
