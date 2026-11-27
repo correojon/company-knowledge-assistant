@@ -11,10 +11,10 @@ Beginner-friendly, zero-cost, built with Spec Driven Development (SDD).
 1. **Part A**: What Spec Driven Development is and how you will work (read first, 15 min).
 2. **Part B**: Set up your computer from scratch (one evening).
 3. **Part C**: Create the repo and project skeleton (one evening).
-4. **Part D**: The roadmap: 8 features, each built spec → plan → tasks → code → verify.
+4. **Part D**: The roadmap: 10 features in 3 milestones, each a vertical slice built spec → plan → tasks → code → verify.
 5. **Part E**: Working loop, git workflow, testing, troubleshooting.
 
-Time budget: about 1 setup weekend + 4–5 build weekends (roughly 8–10 focused hours each).
+Time budget: about 1 setup weekend + 5–6 build weekends (roughly 8–10 focused hours each). A demoable MVP exists after Milestone 1 (about 2.5 weekends).
 
 ---
 
@@ -397,89 +397,242 @@ git push
 
 ---
 
-# PART D: Roadmap: 8 features
+# PART D: Roadmap: 10 features in 3 milestones
 
-For **each** feature: create branch `feat/NNN-name` → write spec → clarify → plan → tasks → implement task by task → verify against acceptance criteria → merge via pull request.
+## D0. How each feature is run
 
-## Feature 001: Document ingestion (Weekend 1, part 1)
+For **each** feature: create branch `NNN-name` (Spec Kit does this) → `/speckit.specify` → `/speckit.clarify` → `/speckit.plan` → `/speckit.tasks` → `/speckit.analyze` → **approve tasks** → `/speckit.implement` task by task → verify every acceptance criterion → pull request → merge.
 
-**Spec focus:** Upload PDF, DOCX, MD, TXT; parse to text with page and heading metadata; chunk; store.
-**Example acceptance criteria**
-- AC-1: Given a valid PDF, when uploaded, then a document record with status `ready` exists and its chunks carry page numbers.
-- AC-2: Given the same file twice (same hash), then the second upload is rejected as duplicate.
-- AC-3: Given a scanned (image-only) PDF with no text, then the status is `failed` with a clear message ("no extractable text").
-- AC-4: Given a file over the size limit or unsupported type, then HTTP 4xx with an explanatory error.
-**Plan topics:** SQLite schema, parser interface (one class per format), heading-aware chunker (~500–800 tokens, ~10% overlap), file storage by hash.
-**Tests:** unit tests for the chunker (never split mid-sentence if avoidable; overlap correct; page metadata preserved).
-**You'll learn:** FastAPI file uploads, SQLModel, text extraction, why chunking matters.
+**Rules that apply to every feature**
 
-## Feature 002: Hybrid retrieval (Weekend 1, part 2)
+1. **Vertical slices.** Every feature ships backend, UI, tests and a short demo step together. After each merge you can show something working in the browser.
+2. **Test-first (Constitution IV).** Each AC maps to at least one test written before the code. LLM calls in tests always go through `FakeProvider` (built in 001), so tests are fast and deterministic.
+3. **Contracts (Constitution IX).** The frontend uses TypeScript types generated from the backend's OpenAPI schema. CI fails if the generated types are stale.
+4. **Validate every LLM output deterministically.** Never trust the model's format. Citation indices must exist. Numbers in summaries must appear in the source. Diff explanations may only reference hunk IDs that exist. Invalid output is repaired, flagged or rejected, never shown as if it were fine.
+5. **Document text is data, not instructions (Constitution X).** Prompts wrap retrieved text in clear delimiters, and the system prompt tells the model to ignore instructions found inside documents. A fixture test covers this.
+6. **Measure, don't guess.** From 003 on, any change to retrieval or prompts runs the eval script and records the result.
 
-**Spec focus:** Given a question, return the most relevant chunks using vector + keyword search merged.
-**Example acceptance criteria**
-- AC-1: A query using different words than the document (a synonym) still returns the correct chunk.
-- AC-2: A query containing an exact identifier (e.g. an error code or part number) returns the chunk containing it at top rank.
-- AC-3: Results include document title, page, score, and text.
-**Plan topics:** `fastembed` embeddings, `sqlite-vec` table, FTS5 table, Reciprocal Rank Fusion (RRF), optional reranker (defer).
-**Tests:** unit-test RRF with hand-made ranked lists; integration test over a tiny fixture corpus.
-**You'll learn:** embeddings, vector similarity, BM25, why hybrid beats either alone.
+**What each feature section gives you**
 
-## Feature 003: Grounded answers with citations (Weekend 2, part 1)
+- **Covers:** the items in `docs/goal.md` this feature delivers.
+- **Depends on:** the features that must be merged first.
+- **Specify input:** a paragraph to paste into `/speckit.specify`. It describes what and why only; technology choices belong in the plan.
+- **Example ACs:** a starting point. `/speckit.clarify` will refine them.
+- **Plan topics, Tests, Demo, You'll learn.**
 
-**Spec focus:** Generate an answer from retrieved chunks, with citations, refusal when unsupported, and follow-up awareness.
-**Example acceptance criteria**
-- AC-1: Answers contain citation markers `[n]` mapping to returned sources.
-- AC-2: Given a question unrelated to any document, the system replies that it can't find the answer and returns no fabricated citations.
-- AC-3: A follow-up ("and what about its maximum value?") is rewritten into a standalone query using chat history.
-- AC-4: Cited indices that don't exist in the sources are removed or flagged.
-**Plan topics:** `LLMProvider` interface (Ollama + OpenAI-compatible), prompt templates in files, score threshold, streaming via SSE.
-**You'll learn:** prompt engineering for grounding, streaming, provider abstraction, the limits of small models.
+**Milestones**
 
-## Feature 004: Chat UI (Weekend 2, part 2)
+| Milestone | Features | Outcome | Time |
+|---|---|---|---|
+| M1: Core MVP | 001–004 | Upload documents, ask questions, get cited answers in a browser | Weekends 1–2.5 |
+| M2: Quality & document intelligence | 005–007 | Measured RAG quality, summaries, document comparison | Weekends 3–4 |
+| M3: Nice-to-haves & ship | 008–010 | Answer modes, history, stats, public demo | Weekends 5–6 |
 
-**Spec focus:** Conversational interface with streaming, source cards, document list and upload.
-**Example acceptance criteria**
-- AC-1: Tokens appear progressively while generating.
-- AC-2: Clicking a citation shows the excerpt, document name and page.
-- AC-3: Upload zone shows progress and processing status; errors are readable.
-- AC-4: Conversations persist and can be reopened.
-**You'll learn:** React state, consuming SSE, component design, loading and error states.
+---
 
-## Feature 005: Summaries and explanation levels (Weekend 3, part 1)
+## Milestone 1: Core MVP
 
-**Spec focus:** Executive and technical summaries per document; explanation level selector for chat answers (executive, technical, beginner).
-**Example acceptance criteria**
-- AC-1: A 100-page document can be summarized without exceeding the model context (hierarchical map-reduce).
-- AC-2: Summaries are cached and regenerated only on request.
-- AC-3: Executive summary is under N words and avoids jargon; technical summary preserves numbers and units.
-**You'll learn:** map-reduce summarization, context window management, prompt variants.
+### Feature 001: Walking skeleton
 
-## Feature 006: Version comparison (Weekend 3, part 2)
+**Covers:** non-functional requirements "simple deployment" and "zero cost"; Constitution VI and IX.
+**Depends on:** Part C.
+**Why first:** the riskiest setup problems (loading sqlite-vec inside a container, reaching Ollama from Docker, keeping the frontend and backend in sync) are cheap to fix now and expensive to fix in the last weekend.
 
-**Spec focus:** Link two documents as versions; show a structured diff and an AI explanation of notable changes.
-**Example acceptance criteria**
-- AC-1: Added, removed and modified sections are listed by heading.
-- AC-2: Line/word-level differences are highlighted in the UI.
-- AC-3: The AI explanation only refers to differences present in the deterministic diff.
-- AC-4: Identical documents show "no differences".
-**Plan topics:** section alignment, `difflib`, diff UI component.
+**Specify input:**
+> As a developer or evaluator, I can clone the repository and start the whole application with one command, see in the browser that the backend is healthy, and switch between a local LLM and a free hosted LLM through configuration only. Tests never need a real LLM.
+
+**Example ACs**
+- AC-1: Given a fresh clone and a copied `.env.example`, when I run `docker compose up`, then the frontend at `http://localhost:5173` (or the configured port) shows "Backend: healthy".
+- AC-2: Given `LLM_PROVIDER=fake`, when the backend asks for a completion, then a canned reply is returned without any network call.
+- AC-3: Given the database is created on startup, the sqlite-vec extension loads and a smoke query succeeds, both locally and inside the container.
+- AC-4: Given a backend schema change, when the generated TypeScript types are not regenerated, then CI fails.
+
+**Plan topics:** `docker-compose.yml` (backend and frontend, Ollama as an optional `profile`), pydantic-settings, Alembic migrations on SQLite, `LLMProvider` interface (`complete`, `stream`) with `FakeProvider`, `OllamaProvider` and `OpenAICompatProvider`, app shell layout (sidebar for Documents, Search and Chat), API client generated with `openapi-typescript`, Vitest set up for the frontend.
+**Spike and ADR:** pick the local model. Run five fixed prompts through two or three candidate models and record how often each one follows the `[n]` citation format. Write the result up as `docs/adr/001-local-model.md`.
+**Tests:** settings parsing, provider selection, sqlite-vec smoke test, contract freshness check in CI.
+**Demo:** `docker compose up` → health badge in the UI.
+**You'll learn:** Docker Compose, configuration, migrations, interfaces and test doubles, typed API clients.
+
+### Feature 002: Document library
+
+**Covers:** goal 1 (upload, store and organize) and the extraction part of goal 2.
+**Depends on:** 001.
+
+**Specify input:**
+> As an employee, I can upload company documents (PDF, DOCX, Markdown, plain text) through the web interface, see each one's processing status, and view, re-process or delete documents in a library. Documents are split into searchable pieces that remember their page and heading. Duplicate, unsupported, oversized and image-only files are rejected with a clear message.
+
+**Example ACs**
+- AC-1: Given a valid text-based PDF, when it is uploaded, then the upload returns immediately with status `pending`, the status moves to `processing` and then `ready`, and every chunk carries its page number and nearest heading.
+- AC-2: Given a file with the same content hash as an existing document, then the upload is rejected as a duplicate and the response names the existing document.
+- AC-3: Given an image-only PDF, then the status ends as `failed` with the message "no extractable text".
+- AC-4: Given a file over `MAX_UPLOAD_MB` or of an unsupported type, then the response is HTTP 413 or 415 with a readable error, and the UI shows it.
+- AC-5: Given a document is deleted, then its file, chunks and index entries are removed and it no longer appears in the library.
+- AC-6: Given several files are dropped at once, then each shows its own progress and status in the library.
+
+**Plan topics:** document and chunk schema, one parser class per format, a heading-aware chunker (start at about 500–800 tokens with about 10% overlap; 005 will tune this), files stored by hash, background processing with FastAPI `BackgroundTasks` and status polling (no queue, per Constitution III), library page with drag-and-drop upload.
+**Tests:** chunker unit tests (no split mid-sentence when avoidable, correct overlap, page metadata preserved), one parser test per format using small fixtures, API tests for each error case, a component test for the upload status.
+**Demo:** drop three files, watch them become `ready`, delete one.
+**You'll learn:** file uploads, background work without queues, text extraction, why chunking matters.
+
+### Feature 003: Semantic search
+
+**Covers:** goal 2 (indexing) and goal 3 (natural-language search).
+**Depends on:** 002.
+
+**Specify input:**
+> As an employee, I can type a question in plain language and see the most relevant passages from all documents, ranked, with document name, page and a relevance score. Search finds passages that use different words from my question, and it also finds exact identifiers such as error codes or part numbers.
+
+**Example ACs**
+- AC-1: Given the fixture corpus, a query that uses a synonym (different words from the document) returns the correct chunk in the top 5.
+- AC-2: Given a query containing an exact identifier (e.g. `E-4021`), then the chunk containing it ranks first.
+- AC-3: Each result includes document title, page, heading, score and an excerpt with the query terms highlighted.
+- AC-4: Given no documents are `ready`, then the search page shows an empty state rather than an error.
+- AC-5: `eval/golden_set.jsonl` exists with at least 15 questions and their expected document and page, and `uv run python -m eval.retrieval` prints hit@5.
+
+**Plan topics:** `fastembed` embeddings computed during ingestion, a `sqlite-vec` table, an FTS5 table, Reciprocal Rank Fusion (RRF), a search page in the UI. A reranker can come later if needed.
+**Tests:** RRF unit tests with hand-made ranked lists, an integration test over a tiny fixture corpus, a snapshot of the eval script's output format.
+**Demo:** search for a synonym and for an error code side by side.
+**You'll learn:** embeddings, vector similarity, BM25, why hybrid search beats either one alone, how to start measuring.
+
+> **Decision: English only.** Documents and questions are in English, so the English embedding model `BAAI/bge-small-en-v1.5` is used. Multilingual support is out of scope. Record this in an ADR, and treat non-English uploads as unsupported. Indexing them is allowed, but retrieval quality for them is not guaranteed.
+
+### Feature 004: Grounded chat
+
+**Covers:** goals 4 (grounded AI answers), 5 (source references) and 6 (chat interface with context).
+**Depends on:** 003.
+
+**Specify input:**
+> As an employee, I can have a conversation with the assistant. Each answer is generated only from the company documents, appears progressively, and cites its sources. I can click a citation to see the excerpt, document and page. Follow-up questions understand earlier turns. When the documents don't contain the answer, the assistant says so instead of guessing.
+
+**Example ACs**
+- AC-1: Answers contain citation markers `[n]`, and each one maps to a source shown below the answer.
+- AC-2: Given an answer cites an index that doesn't exist, then the marker is removed and the response is flagged (validator, rule 4).
+- AC-3: Given a question unrelated to any document (best retrieval score below `MIN_RELEVANCE`), then the reply is a refusal and the response contains no citations.
+- AC-4: Given the previous turn asked about "the X-200 pump", when the user asks "and what is its maximum pressure?", then the retrieval query is rewritten to name the X-200 pump.
+- AC-5: Tokens appear progressively in the UI (SSE), and a stop button cancels generation.
+- AC-6: Clicking a citation opens the excerpt, document name and page.
+- AC-7: Given a fixture document containing "ignore previous instructions and …", then the answer does not follow that instruction.
+- AC-8: The eval script also reports refusal accuracy and citation validity.
+
+**Plan topics:** conversation and message tables (stored on the server, needed for context), a query-rewrite step, prompt templates kept in files, the citation parser and validator, a relevance threshold, SSE streaming, chat UI with source cards.
+**Tests:** citation parser and validator unit tests, prompt-building tests, rewrite tests using `FakeProvider`, an SSE endpoint test, a component test for the citation popover.
+**Demo:** a three-turn conversation with a follow-up and a refusal.
+**You'll learn:** prompt engineering for grounding, streaming, the limits of small models.
+
+**M1 checkpoint:** tag `v0.1`, record a short GIF, and update the README. You now have a working MVP to show.
+
+---
+
+## Milestone 2: Quality and document intelligence
+
+### Feature 005: Evaluation and tuning
+
+**Covers:** the "minimize hallucinations" part of goal 4, made measurable. This is your strongest portfolio differentiator.
+**Depends on:** 004.
+
+**Specify input:**
+> As the developer, I can run one command that measures retrieval and answer quality on a fixed question set, saves the results of each run, and compares runs, so that decisions about chunk size, model, prompts and thresholds are based on numbers.
+
+**Example ACs**
+- AC-1: The golden set has at least 30 answerable questions with their expected document and page, plus at least 5 unanswerable questions.
+- AC-2: The script reports hit@1, hit@5, MRR, refusal accuracy (on both answerable and unanswerable questions) and citation validity rate.
+- AC-3: Each run is saved to `eval/runs/<timestamp>.json` with its configuration, and `--compare A B` prints the differences.
+- AC-4: `docs/eval-report.md` shows at least 3 compared configurations (e.g. two chunk sizes and two models), and an ADR records the chosen defaults.
+
+**Tests:** metric functions are unit-tested with hand-computed examples.
+**You'll learn:** how to measure AI systems, and the trade-off between refusing too much and too little.
+
+### Feature 006: Document summaries
+
+**Covers:** goal 7.
+**Depends on:** 002 and 004 (provider and prompt infrastructure).
+
+**Specify input:**
+> As a manager or engineer, I can open a document and generate an executive summary (short, plain language, decisions and impact) or a technical summary (specifications, numbers, procedures). Long documents are supported. Summaries are saved, so they appear instantly the next time, and I can regenerate them on request.
+
+**Example ACs**
+- AC-1: Given a document longer than the model's context window (fixture of about 100 pages), then a summary is produced (hierarchical map-reduce) and no single LLM call exceeds the configured context budget.
+- AC-2: The executive summary is at most `EXEC_SUMMARY_MAX_WORDS` words (default 200).
+- AC-3: Every number-and-unit pair in the technical summary appears in the source document. Pairs that don't are flagged (validator, rule 4).
+- AC-4: Summaries are cached per document and type. They regenerate only when requested or when the document is re-processed.
+
+**Tests:** map-reduce splitting with `FakeProvider`, word-limit check, number-extraction validator.
+**You'll learn:** map-reduce summarization, context-window budgeting, prompt variants.
+
+### Feature 007: Document comparison
+
+**Covers:** goal 8.
+**Depends on:** 002 and 004.
+
+**Specify input:**
+> As an engineer, I can pick any two documents (typically two versions of the same procedure or specification) and see which sections were added, removed or changed, with word-level highlights, plus a short AI explanation of the notable changes that refers only to real differences.
+
+**Example ACs**
+- AC-1: Added, removed and modified sections are listed by heading. Documents without headings fall back to paragraph alignment.
+- AC-2: Word-level differences are highlighted in a side-by-side view.
+- AC-3: Each claim in the AI explanation cites a hunk ID (`[H3]`). Claims citing unknown IDs are dropped (validator, rule 4).
+- AC-4: Identical documents show "No differences" and make no LLM call.
+- AC-5: Page-number and header/footer noise in PDFs does not create spurious differences (normalization step).
+
+**Plan topics:** text normalization, section alignment, `difflib`, a hunk model with IDs, a diff UI component. No versioning data model: any two documents can be compared.
+**Tests:** alignment and diff unit tests on small fixture pairs, explanation validator, identical-input shortcut.
 **You'll learn:** combining deterministic code with LLMs, text diffing, UI for diffs.
 
-## Feature 007: Evaluation harness (Weekend 4, part 1)
+---
 
-**Spec focus:** A repeatable script that measures answer quality on a golden set.
-**Example acceptance criteria**
-- AC-1: `golden_set.jsonl` contains ≥30 questions with expected source document/page, plus ≥5 unanswerable questions.
-- AC-2: The script reports retrieval hit rate@k and refusal accuracy.
-- AC-3: Results are saved per run so you can compare changes (chunk size, model, prompts).
-- AC-4: Results are summarized in `docs/eval-report.md`.
-**You'll learn:** how to measure AI systems instead of guessing. This is your strongest portfolio differentiator.
+## Milestone 3: Nice-to-haves and ship
 
-## Feature 008: Polish, stats and deploy (Weekend 4–5)
+### Feature 008: Answer modes
 
-**Scope:** Knowledge statistics dashboard (document count, chunk count, top documents cited), engineering mode, README with GIFs and architecture diagram, Dockerfiles and `docker-compose.yml`, seeded sample documents, free hosted demo (check current free-tier options such as Hugging Face Spaces with Docker), short demo video.
+**Covers:** nice-to-haves "explanation levels" and "engineering mode".
+**Depends on:** 004 and 005.
 
-**Cut line if time is short:** drop the reranker, stats dashboard and beginner level first. Never cut citations, the refusal behaviour, or the evaluation.
+**Specify input:**
+> As a user, I can choose how answers are explained (executive, technical, beginner) and turn on an engineering mode that keeps units, identifiers, tolerances and tables exactly as written. Changing the mode never weakens citations or refusals.
+
+**Example ACs**
+- AC-1: The mode selector in the chat changes the prompt variant, and the chosen mode is stored with each message.
+- AC-2: In engineering mode, every identifier and number-and-unit pair in the answer appears in the cited sources.
+- AC-3: Eval runs in every mode show refusal accuracy and citation validity no more than 5 percentage points below the default mode.
+
+**You'll learn:** prompt variants as configuration, regression testing of prompts.
+
+### Feature 009: Conversation history and knowledge stats
+
+**Covers:** nice-to-haves "conversation history" and "knowledge statistics dashboard".
+**Depends on:** 004.
+
+**Specify input:**
+> As a user, I can see my past conversations in a sidebar and reopen or delete them. As a team lead, I can see a dashboard of the knowledge base: documents and chunks by type, most-cited documents, and questions the assistant could not answer (knowledge gaps).
+
+**Example ACs**
+- AC-1: Conversations are listed newest first, and reopening one restores all messages and citations.
+- AC-2: Deleting a conversation removes its messages.
+- AC-3: The dashboard shows document count, chunk count, the top 5 cited documents and the 20 most recent refused questions.
+
+**You'll learn:** aggregate queries, simple dashboards. The "knowledge gaps" list is a selling point for business clients.
+
+### Feature 010: Ship
+
+**Covers:** non-functional requirements "professional appearance" and "easy for clients to understand"; Constitution VI and X for the public demo.
+**Depends on:** M1 at least.
+
+**Specify input:**
+> As a potential client, I can open a public demo with sample documents already loaded and try the assistant without installing anything. The demo cannot be abused to run up costs or to store arbitrary files. As a reviewer, I can read a README that explains the architecture, decisions, evaluation results and limitations.
+
+**Example ACs**
+- AC-1: Given `DEMO_MODE=true`, uploads are disabled (or capped at N small files that are deleted daily), and chat is rate-limited per IP.
+- AC-2: Freely licensed seed documents load automatically on first start.
+- AC-3: The demo runs on a free tier (e.g. Hugging Face Spaces with Docker) with a free hosted LLM through `openai_compat`, and the key is stored only in the platform's secrets.
+- AC-4: The README contains a demo GIF, an architecture diagram, setup steps, links to the ADRs, the eval summary and honest limitations.
+- AC-5: A short demo video (2–3 minutes) is linked.
+
+---
+
+## D1. Cut line
+
+If time runs short, cut in this order: **009**, then **008**, then the hosted demo from **010** (keep the video), then word-level highlighting from **007**.
+**Never cut:** upload through the UI, citations, refusal, or the **005** evaluation.
 
 ---
 
@@ -492,12 +645,12 @@ For **each** feature: create branch `feat/NNN-name` → write spec → clarify �
 3. Ask for the **test first**, then the implementation.
 4. Read the diff. Ask the AI to explain anything you don't understand (this is where the learning happens).
 5. Run tests and the app. Check the relevant acceptance criterion.
-6. Commit: `git commit -m "feat(ingestion): heading-aware chunker (spec 001, T3)"`.
+6. Commit: `git commit -m "feat(ingestion): heading-aware chunker (spec 002, T3)"`.
 7. If you discovered the spec was wrong, update the spec first, then the code.
 
 ## E2. Git workflow (solo, but professional)
 
-- `main` is always working. One branch per feature: `feat/001-ingestion`.
+- `main` is always working. One branch per feature, as Spec Kit names it: `001-walking-skeleton`.
 - Open a pull request to yourself on GitHub (`gh pr create`), let CI run, then merge. The PR history is portfolio evidence.
 - Commit messages follow Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`).
 
@@ -514,7 +667,9 @@ For **each** feature: create branch `feat/NNN-name` → write spec → clarify �
 - `pytest` for pure logic: chunker, RRF, diff, citation parsing, prompt building.
 - Mock the LLM in tests with a fake provider that returns canned text.
 - One integration test per API endpoint using FastAPI's `TestClient`.
-- RAG quality is the evaluation harness (Feature 007), not unit tests.
+- RAG quality is the evaluation harness (seeded in Feature 003, completed in Feature 005), not unit tests.
+- Every LLM output has a deterministic validator (citations, numbers, diff hunk IDs) with its own unit tests.
+- Frontend: Vitest for key components; a CI check that the generated API types match the backend OpenAPI schema.
 
 ## E5. Architecture Decision Records (ADRs)
 
@@ -536,7 +691,7 @@ For each major choice, add `docs/adr/001-sqlite-vec.md` with: Context, Decision,
 ## E7. Definition of done (whole project)
 
 - [ ] `docker compose up` starts everything from a fresh clone
-- [ ] All 8 specs have `spec.md`, `plan.md`, `tasks.md`, all acceptance criteria checked
+- [ ] All in-scope specs (10, minus any cut per D1) have `spec.md`, `plan.md`, `tasks.md`, all acceptance criteria checked
 - [ ] CI is green
 - [ ] Evaluation report committed with real numbers
 - [ ] README: demo GIF, architecture diagram, setup, design decisions, honest limitations
