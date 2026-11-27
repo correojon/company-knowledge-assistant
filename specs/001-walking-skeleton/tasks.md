@@ -180,7 +180,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   - Both contract examples pass `HealthReport.model_validate`.
 
   Use PyYAML, which `uvicorn[standard]` already installs. If `import yaml` fails, add `pyyaml` to the dev group only. Fix the models until the test passes.
-- [ ] T016 [US1] Entry point and the missing-config notice (US1-6, FR-008, contracts/configuration.md "Startup errors" rows with exit code 1). **Test first**:
+- [X] T016 [US1] Entry point and the missing-config notice (US1-6, FR-008, contracts/configuration.md "Startup errors" rows with exit code 1). **Test first**:
   - In backend/tests/unit/test_config.py, `test_notice_when_config_file_absent`: `startup_notice(settings)` returns exactly `Notice: no .env file found; using built-in defaults (copy .env.example to .env to customise).` when `config_file_loaded` is false, and `None` when it is true.
   - backend/tests/unit/test_main.py, with `uvicorn.run` monkeypatched:
     - `test_main_prints_notice_and_runs_uvicorn` checks the notice on stdout and that `uvicorn.run` is called with host `0.0.0.0` and port 8000.

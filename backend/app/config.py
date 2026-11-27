@@ -52,3 +52,14 @@ def load_settings() -> Settings:
     """Build settings, reading ``ENV_FILE`` only if it exists when called."""
     env_file = ENV_FILE if ENV_FILE.exists() else None
     return Settings(_env_file=env_file)
+
+
+NO_CONFIG_NOTICE = (
+    "Notice: no .env file found; using built-in defaults "
+    "(copy .env.example to .env to customise)."
+)
+
+
+def startup_notice(settings: Settings) -> str | None:
+    """The notice to print when no ``.env`` set the ``CONFIG_FILE_LOADED`` sentinel."""
+    return None if settings.config_file_loaded else NO_CONFIG_NOTICE

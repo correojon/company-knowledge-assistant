@@ -156,3 +156,16 @@ def test_env_file_is_the_repository_root_dotenv() -> None:
 
 def test_tests_never_see_the_real_env_file() -> None:
     assert not config.ENV_FILE.exists()
+
+
+NO_CONFIG_NOTICE = (
+    "Notice: no .env file found; using built-in defaults "
+    "(copy .env.example to .env to customise)."
+)
+
+
+def test_notice_when_config_file_absent() -> None:
+    from app.config import startup_notice
+
+    assert startup_notice(Settings(config_file_loaded=False)) == NO_CONFIG_NOTICE
+    assert startup_notice(Settings(config_file_loaded=True)) is None
