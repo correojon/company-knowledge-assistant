@@ -187,7 +187,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
     - `test_main_startup_error_exits_1` checks for `SystemExit(1)`, a stderr line starting `Startup failed: data directory`, and that `uvicorn.run` is not called.
 
   **Implement** `startup_notice` in backend/app/config.py. Implement `main()` in backend/app/__main__.py: `load_settings()` → print the notice → `state = startup(settings)`, which on `StartupError` prints `Startup failed: <reason>.` to stderr and exits 1 → `uvicorn.run(create_app(settings, state=state), host="0.0.0.0", port=8000)`.
-- [ ] T017 [P] [US1] Rewrite .env.example to match the settings defaults (FR-008, US1-6, research.md R4). **Test first**, in backend/tests/unit/test_env_example.py:
+- [X] T017 [P] [US1] Rewrite .env.example to match the settings defaults (FR-008, US1-6, research.md R4). **Test first**, in backend/tests/unit/test_env_example.py:
   - Every key in the repo-root .env.example is either a `Settings` field or one of `BACKEND_PORT`, `FRONTEND_PORT` or `API_PROXY_TARGET`.
   - Every `Settings` field is present in the file.
   - Keys appear in the order of the contracts/configuration.md table.
