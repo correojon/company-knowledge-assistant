@@ -39,7 +39,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   - Run `uv lock` to refresh backend/uv.lock.
 
   Verify: `uv sync && uv run ruff check .` passes. No tests exist yet, so pytest exit code 5 is expected until T004.
-- [ ] T002 [P] Create the empty backend package and test layout:
+- [X] T002 [P] Create the empty backend package and test layout:
   - `backend/app/__init__.py` with `__version__ = "0.1.0"`, `backend/app/api/__init__.py` and `backend/app/llm/__init__.py`.
   - The directories `backend/tests/unit/`, `backend/tests/integration/`, `backend/tests/contract/` and `backend/scripts/`, each with a `.gitkeep` until it holds files.
 
