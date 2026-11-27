@@ -113,7 +113,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   - The probe timeout is 3 s.
 
   **Implement** `OllamaProvider(base_url, model, timeout_seconds, transport=None)` in backend/app/llm/ollama.py, with `name = "ollama"` and `check()`. Have `complete` and `stream` raise `NotImplementedError` until T029.
-- [ ] T009 Provider factory. **Test first**, in backend/tests/unit/test_factory.py:
+- [X] T009 Provider factory. **Test first**, in backend/tests/unit/test_factory.py:
   - `fake` gives a `FakeProvider` with `model == "fake"`.
   - `ollama` gives an `OllamaProvider` carrying `ollama_base_url`, `ollama_model` and `llm_timeout_seconds` from Settings.
 
