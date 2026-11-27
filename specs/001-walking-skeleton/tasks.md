@@ -149,7 +149,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   - backend/migrations/env.py, which takes the connection from `config.attributes["connection"]`, uses `render_as_batch=True`, and does not call `fileConfig` so app logging is left alone.
   - backend/migrations/versions/0001_baseline.py, which creates no tables.
   - In backend/app/db.py, `migrate(engine) -> str`, which runs `alembic.command.upgrade(cfg, "head")` programmatically, resolves `script_location` from the file's path, and returns the head revision. It wraps any exception in `StartupError("migration failed: <reason>")`.
-- [ ] T012 [US1] Vector smoke check (US1-3, the "sqlite-vec fails to load" edge case). **Test first**, in backend/tests/integration/test_startup.py:
+- [X] T012 [US1] Vector smoke check (US1-3, the "sqlite-vec fails to load" edge case). **Test first**, in backend/tests/integration/test_startup.py:
   - `test_vector_smoke_check_returns_version`: the check returns a non-empty version.
   - `test_vector_load_failure_stops_startup`: with `sqlite_vec.load` monkeypatched to raise, it raises `StartupError("vector search unavailable: …")`.
 

@@ -8,9 +8,16 @@ from pathlib import Path
 
 import alembic.command
 import pytest
+import sqlite_vec
 from sqlalchemy import Engine, text
 
-from app.db import StartupError, create_db_engine, migrate, prepare_data_dir
+from app.db import (
+    StartupError,
+    create_db_engine,
+    migrate,
+    prepare_data_dir,
+    vector_smoke_check,
+)
 
 
 def test_prepare_data_dir_creates_missing_dir(tmp_path: Path) -> None:
@@ -107,3 +114,39 @@ def test_migration_failure_stops_startup(
         migrate(engine)
 
     assert str(excinfo.value) == "migration failed: disk on fire"
+
+
+def test_vector_smoke_check_returns_version(engine: Engine) -> None:
+    version = vector_smoke_check(engine)
+
+    assert isinstance(version, str)
+    assert version
+
+
+def test_vector_load_failure_stops_startup(
+    database_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def broken_load(_conn: object) -> None:
+        raise RuntimeError("extension missing")
+
+    monkeypatch.setattr(sqlite_vec, "load", broken_load)
+    engine = create_db_engine(database_path)
+    try:
+        with pytest.raises(StartupError) as excinfo:
+            vector_smoke_check(engine)
+    finally:
+        engine.dispose()
+
+    assert str(excinfo.value) == "vector search unavailable: extension missing"
+
+
+def test_vector_smoke_check_leaves_nothing_behind(
+    engine: Engine, database_path: Path
+) -> None:
+    # Same pooled connection twice: the temp table must really be dropped.
+    vector_smoke_check(engine)
+    assert vector_smoke_check(engine)
+
+    with closing(sqlite3.connect(database_path)) as conn:
+        names = conn.execute("SELECT name FROM sqlite_master").fetchall()
+    assert ("vec_smoke",) not in names
