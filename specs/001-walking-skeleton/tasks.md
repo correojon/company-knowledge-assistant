@@ -201,7 +201,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   **Implement** backend/scripts/export_openapi.py. It takes an optional output path (default `../frontend/src/api/openapi.json`), builds `create_app(Settings(_env_file=None, llm_provider="fake"))` without running the lifespan, and writes `json.dumps(app.openapi(), indent=2, sort_keys=True) + "\n"`.
 
   Add the script `"gen:api"` to frontend/package.json: `cd ../backend && uv run python scripts/export_openapi.py && cd ../frontend && openapi-typescript src/api/openapi.json -o src/api/schema.d.ts`. Add `src/api/schema.d.ts` to the ignores in frontend/eslint.config.js. Run `npm run gen:api` and commit frontend/src/api/openapi.json and frontend/src/api/schema.d.ts.
-- [ ] T019 [US1] Typed API client (US1-2, research.md R9). **Test first**, in frontend/src/test/client.test.ts, with `fetch` stubbed by `vi.stubGlobal`. `getHealth()`:
+- [X] T019 [US1] Typed API client (US1-2, research.md R9). **Test first**, in frontend/src/test/client.test.ts, with `fetch` stubbed by `vi.stubGlobal`. `getHealth()`:
   - resolves to the parsed body on 200;
   - rejects on a non-2xx status, on a fetch rejection and on invalid JSON;
   - aborts and rejects after 4000 ms when fetch never settles (use `vi.useFakeTimers`).
