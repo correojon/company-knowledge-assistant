@@ -1,9 +1,10 @@
 <!--
 Sync Impact Report:
-- Version change: 2.0.0 -> 2.0.1
-- Modified principles: none
-- Added sections: rationale paragraphs for principles I-VIII
-- Removed sections: none
+- Version change: 2.0.1 -> 2.0.2
+- Modified principles: IV. Strict TDD -> IV. Test-First Quality Gate; renumbered former
+  principles XI-XII as X-XI
+- Added sections: none
+- Removed sections: principle X. Test-First Quality Gate (merged into principle IV)
 - Templates requiring follow-up: none
 - Deferred TODOs: none
 -->
@@ -34,12 +35,17 @@ One SQLite file, no queues, no auth, no extra services unless a spec proves the 
 Rationale: keeping infrastructure minimal reduces operational burden and lets the project
 validate its core knowledge-assistant behavior before introducing complexity.
 
-### IV. Test what matters
+### IV. Test-First Quality Gate (NON-NEGOTIABLE)
+Behavior changes MUST begin with a failing test derived from the spec's acceptance criteria
+or a reproducible regression case. Run the test and confirm it fails before implementing the
+change. Tests MUST NOT be modified or deleted solely to make them pass; if a test's expectation
+seems wrong, pause and resolve the requirement before proceeding. Each task MUST pass its focused
+tests and relevant quality checks. Before merge, the full applicable test suite and CI MUST pass.
+Integration boundaries, retrieval behavior, document parsing, and data migrations MUST receive
+coverage appropriate to their risk.
 
-Pure logic (chunking, diffing, retrieval fusion, citation parsing) has unit tests. The RAG quality is measured by the  evaluation harness.
-
-Rationale: testing deterministic core logic and measuring retrieval quality target the areas most
-likely to affect answer correctness and catch regressions where they matter most.
+Rationale: test-first development makes expected behavior explicit while focused checks keep
+individual tasks fast and the full merge gate protects against regressions.
 
 ### V. No framework magic for core logic
 
@@ -78,17 +84,7 @@ and backend contracts MUST be exercised by automated tests.
 Rationale: FastAPI, Pydantic, SQLModel, and React integration depend on reliable contracts across
 service boundaries.
 
-### X. Test-First Quality Gate (NON-NEGOTIABLE)
-
-Behavior changes MUST begin with a failing test or a reproducible regression case. Implementations
-MUST pass focused tests and the relevant backend or frontend quality checks before merge.
-Integration boundaries, retrieval behavior, document parsing, and data migrations MUST receive
-coverage appropriate to their risk.
-
-Rationale: test-first development makes expected behavior explicit and prevents regressions in
-retrieval, indexing, and user-facing workflows.
-
-### XI. Security and Data Stewardship
+### X. Security and Data Stewardship
 
 Secrets, credentials, private documents, and personal data MUST NOT be committed or logged.
 Untrusted document content and external input MUST be treated as data, not instructions, and MUST
@@ -98,7 +94,7 @@ explicitly and documented for features that handle restricted knowledge.
 Rationale: organizational knowledge can contain confidential or sensitive information that requires
 defense in depth.
 
-### XII. Maintainable Simplicity
+### XI. Maintainable Simplicity
 
 Implementations MUST favor the smallest design that satisfies the stated requirement. New
 dependencies, abstractions, background services, and infrastructure MUST be justified by a concrete
@@ -142,5 +138,5 @@ Compliance reviews MUST cover test evidence, source attribution, security and pr
 API compatibility, dependency changes, and clarity of operational documentation. Ratification and
 amendment dates MUST use ISO 8601 format.
 
-**Version**: 2.0.1 | **Ratified**: 2026-11-26 |
-**Last Amended**: 2026-11-26
+**Version**: 2.0.2 | **Ratified**: 2026-11-26 |
+**Last Amended**: 2026-11-27
