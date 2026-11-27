@@ -252,7 +252,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   - A named volume `app-data`.
 
   No `ollama` service. Verify with quickstart V1, V2 (no `.env` → notice in `docker compose logs backend`), V3, V4 and V9.
-- [ ] T026 [US1] Write the README getting-started sections (FR-018) in README.md:
+- [X] T026 [US1] Write the README getting-started sections (FR-018) in README.md:
   - prerequisites (Git, Docker with Compose ≥ 2.24; uv and Node 26 for native runs);
   - `cp .env.example .env` (optional: built-in defaults apply without it);
   - `docker compose up --build` and the address http://localhost:5173;

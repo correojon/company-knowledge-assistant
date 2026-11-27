@@ -75,7 +75,12 @@ On a scratch branch, add an optional field to `HealthReport` without running `np
 
 ## V9. Port in use (edge case)
 
-Occupy port 5173 (`python3 -m http.server 5173`), then run `docker compose up`. Expected: Docker reports that the port is already allocated. Setting `FRONTEND_PORT=5174` in `.env` fixes it, and the README says so.
+Occupy port 5173 (`python3 -m http.server 5173`), make sure the stack is down (`docker compose down`), then run `docker compose up`. Expected, depending on the host:
+
+- Native Linux or macOS: Docker reports that the port is already allocated, and the frontend does not start.
+- WSL2 with Docker Desktop: Docker publishes the port outside the WSL network, so it does not see the clash. The stack starts, but `curl -s -o /dev/null -w "%{http_code}\n" localhost:5173/api/health` from WSL reaches the other program (here `404`), not the app.
+
+In both cases, setting `FRONTEND_PORT=5174` in `.env` fixes it, and the README says so and describes both symptoms.
 
 ## V10. Secrets never committed (SC-007)
 
