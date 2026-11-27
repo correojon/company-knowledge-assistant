@@ -228,7 +228,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   - frontend/src/App.tsx: render `AppShell`.
 
   Delete the unused template files frontend/src/App.css, frontend/src/assets/hero.png, frontend/src/assets/react.svg and frontend/src/assets/vite.svg if nothing references them.
-- [ ] T022 [P] [US1] API proxy in frontend/vite.config.ts (the cross-origin edge case, research.md R2). Set `server.proxy` and `preview.proxy` so `/api` goes to `process.env.API_PROXY_TARGET ?? "http://localhost:8000"`. No automated test: this is build configuration. Verify natively: `cd backend && uv run python -m app` plus `cd frontend && npm run dev`, then open http://localhost:5173. It shows "Backend: healthy" with no CORS error in the console.
+- [X] T022 [P] [US1] API proxy in frontend/vite.config.ts (the cross-origin edge case, research.md R2). Set `server.proxy` and `preview.proxy` so `/api` goes to `process.env.API_PROXY_TARGET ?? "http://localhost:8000"`. No automated test: this is build configuration. Verify natively: `cd backend && uv run python -m app` plus `cd frontend && npm run dev`, then open http://localhost:5173. It shows "Backend: healthy" with no CORS error in the console.
 - [ ] T023 [US1] Backend container: backend/Dockerfile and backend/.dockerignore (research.md R15).
   - Base image `python:3.12-slim`, with `COPY --from=ghcr.io/astral-sh/uv:<pinned> /uv /bin/uv`.
   - Cache the dependency layer by running `uv sync --frozen --no-dev --no-install-project` with only pyproject.toml and uv.lock copied.
