@@ -44,7 +44,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   - The directories `backend/tests/unit/`, `backend/tests/integration/`, `backend/tests/contract/` and `backend/scripts/`, each with a `.gitkeep` until it holds files.
 
   Leave the existing `backend/app/main.py` in place for now; T013 replaces it.
-- [ ] T003 [P] Add frontend test and type tooling in frontend/package.json and frontend/vite.config.ts:
+- [X] T003 [P] Add frontend test and type tooling in frontend/package.json and frontend/vite.config.ts:
   - `npm i -D vitest jsdom @testing-library/react @testing-library/jest-dom openapi-typescript`.
   - Add the script `"test": "vitest run"`.
   - Add a `test` block to vite.config.ts (`/// <reference types="vitest/config" />`) with `environment: "jsdom"`, `setupFiles: ["./src/test/setup.ts"]` and `passWithNoTests: true`.
