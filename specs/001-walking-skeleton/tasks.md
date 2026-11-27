@@ -216,7 +216,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   Unmounting stops polling.
 
   **Implement** frontend/src/hooks/useHealth.ts, which polls `getHealth` every 5000 ms, never runs overlapping requests and cleans up on unmount. Implement frontend/src/components/HealthBadge.tsx, which shows the backend status only. The LLM badge is added in T035.
-- [ ] T021 [US1] App shell with placeholders (US1-5, FR-006). **Test first**, in frontend/src/test/AppShell.test.tsx, with `fetch` mocked:
+- [X] T021 [US1] App shell with placeholders (US1-5, FR-006). **Test first**, in frontend/src/test/AppShell.test.tsx, with `fetch` mocked:
   - Navigation shows the entries Documents, Search and Chat.
   - Documents is selected by default.
   - Clicking each entry shows its heading and the text `not available yet`.
