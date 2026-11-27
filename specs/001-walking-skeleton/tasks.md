@@ -207,7 +207,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   - aborts and rejects after 4000 ms when fetch never settles (use `vi.useFakeTimers`).
 
   **Implement** frontend/src/api/client.ts: `export type HealthReport = components["schemas"]["HealthReport"]` from `./schema`, and `getHealth(signal?)`, which fetches the relative URL `/api/health` with an `AbortController` timeout of 4000 ms.
-- [ ] T020 [US1] `useHealth` hook and backend badge (US1-1, US1-2, FR-004). **Test first**, in frontend/src/test/HealthBadge.test.tsx, with fake timers and mocked `fetch`. The badge shows:
+- [X] T020 [US1] `useHealth` hook and backend badge (US1-1, US1-2, FR-004). **Test first**, in frontend/src/test/HealthBadge.test.tsx, with fake timers and mocked `fetch`. The badge shows:
   - `Backend: checking…` before the first response, never a blank page;
   - `Backend: healthy` on an ok response;
   - `Backend: unreachable` within 10 s when fetch rejects, returns 500 or hangs;
