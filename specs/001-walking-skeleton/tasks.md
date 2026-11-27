@@ -96,7 +96,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   - backend/app/llm/types.py: `ChatMessage`, `Completion`, `Availability` and `LLMProviderError`, covering data-model.md ChatMessage.role, Completion.provider, Availability.status, Availability.reason, Availability.checked_at (UTC) and LLMProviderError.reason.
   - backend/app/llm/base.py: the `LLMProvider` Protocol.
   - backend/app/llm/fake.py: `FakeProvider`, which does no I/O.
-- [ ] T007 `AvailabilityCache` (FR-012, SC-008, research.md R7). **Test first**, in backend/tests/unit/test_availability_cache.py, with an injectable clock and a counting stub provider:
+- [X] T007 `AvailabilityCache` (FR-012, SC-008, research.md R7). **Test first**, in backend/tests/unit/test_availability_cache.py, with an injectable clock and a counting stub provider:
   - Two calls 59 s apart make one probe.
   - A call at exactly 60 s makes a second probe.
   - An `unavailable` result is also cached.
