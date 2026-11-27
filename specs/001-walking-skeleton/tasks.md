@@ -81,7 +81,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   - `load_settings()`, which calls `Settings(_env_file=ENV_FILE if ENV_FILE.exists() else None)` and reads `ENV_FILE` at call time.
 
   Leave the cross-field provider rules for T027. **Extend** backend/tests/conftest.py so the autouse fixture monkeypatches `app.config.ENV_FILE` to a non-existent path under `tmp_path`. Tests then never read the developer's `.env`.
-- [ ] T006 [P] LLM types, the `LLMProvider` Protocol and `FakeProvider` (US2-1, US3-2, FR-015, contracts/llm-provider.md).
+- [X] T006 [P] LLM types, the `LLMProvider` Protocol and `FakeProvider` (US2-1, US3-2, FR-015, contracts/llm-provider.md).
 
   **Test first**, in backend/tests/unit/test_fake_provider.py:
   - The default reply is `"This is a canned reply from the fake provider."`.
