@@ -129,7 +129,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
 
 **Independent Test**: quickstart.md V1, V2, V3, V4 and V9. Clone into an empty folder, run `docker compose up --build` and open http://localhost:5173. It shows "Backend: healthy" and the three placeholder sections.
 
-- [ ] T010 [US1] Data directory and engine (FR-005, the "data dir not writable" edge case, research.md R8). **Test first**, in backend/tests/integration/test_startup.py:
+- [X] T010 [US1] Data directory and engine (FR-005, the "data dir not writable" edge case, research.md R8). **Test first**, in backend/tests/integration/test_startup.py:
   - `test_prepare_data_dir_creates_missing_dir`.
   - `test_unwritable_data_dir_fails`: on a `chmod 0o500` directory, it raises `StartupError` with the message `data directory '<path>' is not writable`. Skip it when running as root.
   - `test_engine_connection_has_vec_and_pragmas`: `SELECT vec_version()` returns a value, `PRAGMA journal_mode` is `wal` and `PRAGMA foreign_keys` is `1`.
