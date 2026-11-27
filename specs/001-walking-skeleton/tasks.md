@@ -138,7 +138,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   - `StartupError`.
   - `prepare_data_dir(path)`, which creates the directory and writes then removes a probe file.
   - `create_db_engine(database_path)`, with a `connect` listener that enables extension loading, calls `sqlite_vec.load` and disables extension loading again, and sets both PRAGMAs.
-- [ ] T011 [US1] Alembic baseline and migrate (US1-3, US1-4, FR-005). **Test first**, in backend/tests/integration/test_startup.py:
+- [X] T011 [US1] Alembic baseline and migrate (US1-3, US1-4, FR-005). **Test first**, in backend/tests/integration/test_startup.py:
   - `test_migrate_fresh_store_to_head`: `alembic_version` holds `0001_baseline`.
   - `test_restart_reuses_store`: create a sentinel table with one row through `sqlite3`, call `migrate` again, and assert that the row still exists and the file's inode is unchanged.
   - `test_migration_failure_stops_startup`: with `alembic.command.upgrade` monkeypatched to raise, `migrate` raises `StartupError("migration failed: …")`.

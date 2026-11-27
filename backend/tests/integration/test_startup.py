@@ -1,12 +1,16 @@
 """Startup building blocks: data directory, engine, migrations, vector check (R8)."""
 
 import os
+import sqlite3
+from collections.abc import Iterator
+from contextlib import closing
 from pathlib import Path
 
+import alembic.command
 import pytest
-from sqlalchemy import text
+from sqlalchemy import Engine, text
 
-from app.db import StartupError, create_db_engine, prepare_data_dir
+from app.db import StartupError, create_db_engine, migrate, prepare_data_dir
 
 
 def test_prepare_data_dir_creates_missing_dir(tmp_path: Path) -> None:
@@ -48,3 +52,58 @@ def test_engine_connection_has_vec_and_pragmas(tmp_path: Path) -> None:
     assert vec_version
     assert journal_mode == "wal"
     assert foreign_keys == 1
+
+
+@pytest.fixture
+def database_path(tmp_path: Path) -> Path:
+    return tmp_path / "knowledge.sqlite3"
+
+
+@pytest.fixture
+def engine(database_path: Path) -> Iterator[Engine]:
+    engine = create_db_engine(database_path)
+    yield engine
+    engine.dispose()
+
+
+def test_migrate_fresh_store_to_head(engine: Engine, database_path: Path) -> None:
+    revision = migrate(engine)
+
+    assert revision == "0001_baseline"
+    with closing(sqlite3.connect(database_path)) as conn:
+        rows = conn.execute("SELECT version_num FROM alembic_version").fetchall()
+    assert rows == [("0001_baseline",)]
+
+
+def test_restart_reuses_store(engine: Engine, database_path: Path) -> None:
+    migrate(engine)
+    with closing(sqlite3.connect(database_path)) as conn, conn:
+        conn.execute("CREATE TABLE sentinel (value TEXT)")
+        conn.execute("INSERT INTO sentinel VALUES ('kept')")
+    inode_before = database_path.stat().st_ino
+    engine.dispose()
+
+    restarted = create_db_engine(database_path)
+    try:
+        revision = migrate(restarted)
+    finally:
+        restarted.dispose()
+
+    assert revision == "0001_baseline"
+    assert database_path.stat().st_ino == inode_before
+    with closing(sqlite3.connect(database_path)) as conn:
+        assert conn.execute("SELECT value FROM sentinel").fetchall() == [("kept",)]
+
+
+def test_migration_failure_stops_startup(
+    engine: Engine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def broken_upgrade(*_: object, **__: object) -> None:
+        raise RuntimeError("disk on fire")
+
+    monkeypatch.setattr(alembic.command, "upgrade", broken_upgrade)
+
+    with pytest.raises(StartupError) as excinfo:
+        migrate(engine)
+
+    assert str(excinfo.value) == "migration failed: disk on fire"
