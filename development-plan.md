@@ -53,13 +53,13 @@ For each feature:
 
 | Command | Purpose |
 |---|---|
-| `/speckit.constitution` | Write the project's non-negotiable principles |
-| `/speckit.specify` | Turn a feature idea into a spec |
-| `/speckit.clarify` | Ask you questions about gaps in the spec |
-| `/speckit.plan` | Produce the technical plan |
-| `/speckit.tasks` | Break the plan into tasks |
-| `/speckit.analyze` | Check spec, plan and tasks for inconsistencies |
-| `/speckit.implement` | Execute the tasks |
+| `/speckit-constitution` | Write the project's non-negotiable principles |
+| `/speckit-specify` | Turn a feature idea into a spec |
+| `/speckit-clarify` | Ask you questions about gaps in the spec |
+| `/speckit-plan` | Produce the technical plan |
+| `/speckit-tasks` | Break the plan into tasks |
+| `/speckit-analyze` | Check spec, plan and tasks for inconsistencies |
+| `/speckit-implement` | Execute the tasks |
 
 It works with several AI assistants (Claude Code, GitHub Copilot, Gemini CLI and others). Command names and options evolve, so confirm in the repo README: https://github.com/github/spec-kit
 
@@ -401,7 +401,9 @@ git push
 
 ## D0. How each feature is run
 
-For **each** feature: create branch `NNN-name` (Spec Kit does this) → `/speckit.specify` → `/speckit.clarify` → `/speckit.plan` → `/speckit.tasks` → `/speckit.analyze` → **approve tasks** → `/speckit.implement` task by task → verify every acceptance criterion → pull request → merge.
+For **each** feature: create branch `NNN-name` (Spec Kit does this) → `/speckit-specify` → `/speckit-clarify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze` → **approve tasks** → `/speckit-implement` task by task → verify every acceptance criterion → pull request → merge.
+
+The step-by-step version of this loop is in [docs/feature-workflow.md](docs/feature-workflow.md).
 
 **Rules that apply to every feature**
 
@@ -416,8 +418,8 @@ For **each** feature: create branch `NNN-name` (Spec Kit does this) → `/specki
 
 - **Covers:** the items in `docs/goal.md` this feature delivers.
 - **Depends on:** the features that must be merged first.
-- **Specify input:** a paragraph to paste into `/speckit.specify`. It describes what and why only; technology choices belong in the plan.
-- **Example ACs:** a starting point. `/speckit.clarify` will refine them.
+- **Specify input:** a paragraph to paste into `/speckit-specify`. It describes what and why only; technology choices belong in the plan.
+- **Example ACs:** a starting point. `/speckit-clarify` will refine them.
 - **Plan topics, Tests, Demo, You'll learn.**
 
 **Milestones**
