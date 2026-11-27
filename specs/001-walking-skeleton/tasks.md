@@ -103,7 +103,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   - `asyncio.gather` of 5 concurrent calls makes 1 probe.
 
   **Implement** `AvailabilityCache(provider, ttl_seconds=60, clock=time.monotonic)` with an `asyncio.Lock` and an `async get() -> Availability` method, in backend/app/llm/base.py.
-- [ ] T008 `OllamaProvider.check()` (US2-4, FR-012, the "model not pulled" edge case, research.md R7). **Test first**, in backend/tests/integration/test_ollama_provider.py, using `httpx.MockTransport`:
+- [X] T008 `OllamaProvider.check()` (US2-4, FR-012, the "model not pulled" edge case, research.md R7). **Test first**, in backend/tests/integration/test_ollama_provider.py, using `httpx.MockTransport`:
   - The check sends only `GET /api/tags`. Assert that no POST is sent.
   - The model matches by exact name, or by name plus `:latest`.
   - A missing model gives `model 'X' not found; run: ollama pull X`.
