@@ -30,7 +30,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
 
 **Purpose**: Clean package layout and test tooling on both sides
 
-- [ ] T001 Clean up backend/pyproject.toml per research.md R14:
+- [X] T001 Clean up backend/pyproject.toml per research.md R14:
   - Delete `backend/src/backend/`.
   - Remove `[project.scripts]` and `[build-system]`, and replace the placeholder `description`.
   - Add `[tool.uv] package = false`.
