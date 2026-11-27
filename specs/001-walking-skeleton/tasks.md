@@ -174,7 +174,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   Add backend/tests/unit/test_version.py, which asserts that `app.__version__` equals the version in backend/pyproject.toml (read with `tomllib`).
 
   **Implement** `HealthReport`, `DatabaseStatus` and `LLMStatus` in backend/app/api/health.py. Add an `APIRouter(prefix="/api")` with `GET /health` and `operation_id="getHealth"`, and include it in `create_app`.
-- [ ] T015 [US1] Contract test (Constitution IX, FR-003). In backend/tests/contract/test_health_contract.py, load specs/001-walking-skeleton/contracts/openapi-health.yaml (repository path from `Path(__file__)`) and compare it with `create_app(...).openapi()`. Check that:
+- [X] T015 [US1] Contract test (Constitution IX, FR-003). In backend/tests/contract/test_health_contract.py, load specs/001-walking-skeleton/contracts/openapi-health.yaml (repository path from `Path(__file__)`) and compare it with `create_app(...).openapi()`. Check that:
   - `/api/health` GET has `operationId == "getHealth"`.
   - For `HealthReport`, `DatabaseStatus` and `LLMStatus`, the property names, `required` lists and enum values match. Resolve `$ref`/`anyOf` for nullable `reason`.
   - Both contract examples pass `HealthReport.model_validate`.
