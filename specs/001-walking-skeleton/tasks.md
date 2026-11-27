@@ -164,7 +164,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   - `create_app(settings, *, state=None, provider=None)`, whose lifespan calls `startup` only when `state` is None.
 
   Delete the old `/health` route and the module-level `app`. Add an `app_factory` fixture to backend/tests/conftest.py that builds `Settings` with the fake provider and `data_dir` under `tmp_path`.
-- [ ] T014 [US1] Health endpoint (US1-1, FR-003, US2-4 backend side, FR-012 caching, contracts/openapi-health.yaml). Models must cover data-model.md HealthReport.status, HealthReport.version, DatabaseStatus.status, DatabaseStatus.schema_revision, DatabaseStatus.vector_search, DatabaseStatus.vector_search_version, LLMStatus.provider, LLMStatus.model, LLMStatus.status, LLMStatus.reason and LLMStatus.checked_at.
+- [X] T014 [US1] Health endpoint (US1-1, FR-003, US2-4 backend side, FR-012 caching, contracts/openapi-health.yaml). Models must cover data-model.md HealthReport.status, HealthReport.version, DatabaseStatus.status, DatabaseStatus.schema_revision, DatabaseStatus.vector_search, DatabaseStatus.vector_search_version, LLMStatus.provider, LLMStatus.model, LLMStatus.status, LLMStatus.reason and LLMStatus.checked_at.
 
   **Test first**, in backend/tests/integration/test_health.py:
   - `test_health_ok_with_fake_provider`: checks every field. `version == app.__version__`, and `llm` is `fake`/`fake`/`available` with `reason` null and `checked_at` in UTC.

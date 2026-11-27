@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from fastapi import FastAPI
 from sqlalchemy import Engine
 
+from app.api.health import router as health_router
 from app.config import Settings
 from app.db import create_db_engine, migrate, prepare_data_dir, vector_smoke_check
 from app.llm.base import AvailabilityCache, LLMProvider
@@ -71,4 +72,6 @@ def create_app(
             if owned:
                 app_state.engine.dispose()
 
-    return FastAPI(title="Knowledge Assistant", lifespan=lifespan)
+    app = FastAPI(title="Knowledge Assistant", lifespan=lifespan)
+    app.include_router(health_router)
+    return app
