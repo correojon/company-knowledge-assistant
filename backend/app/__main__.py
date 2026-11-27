@@ -27,6 +27,7 @@ def main() -> None:
     except StartupError as exc:
         print(f"Startup failed: {str(exc).rstrip('.')}.", file=sys.stderr)
         sys.exit(1)
+    print(state.migration_summary, flush=True)
 
     try:
         uvicorn.run(create_app(settings, state=state), host=HOST, port=PORT)

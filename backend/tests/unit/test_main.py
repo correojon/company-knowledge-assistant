@@ -32,6 +32,7 @@ def test_main_prints_notice_and_runs_uvicorn(
 
     out = capsys.readouterr().out
     assert "Notice: no .env file found; using built-in defaults" in out
+    assert "Database created at schema revision 0001_baseline." in out
     assert len(uvicorn_run.calls) == 1
     app, kwargs = uvicorn_run.calls[0]
     assert isinstance(app, FastAPI)

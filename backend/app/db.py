@@ -2,6 +2,7 @@
 
 import sqlite3
 import uuid
+from dataclasses import dataclass
 from pathlib import Path
 
 import alembic.command
@@ -67,13 +68,31 @@ def create_db_engine(database_path: Path) -> Engine:
     return engine
 
 
-def migrate(engine: Engine) -> str:
-    """Bring the store up to the head revision and return the revision it is now at."""
+@dataclass(frozen=True)
+class Migration:
+    """The schema revision before and after ``migrate``; ``before`` is None if empty."""
+
+    before: str | None
+    revision: str
+
+    @property
+    def summary(self) -> str:
+        """One line for the startup log."""
+        if self.before == self.revision:
+            return f"Database schema already at head ({self.revision})."
+        if self.before is None:
+            return f"Database created at schema revision {self.revision}."
+        return f"Database migrated from {self.before} to {self.revision}."
+
+
+def migrate(engine: Engine) -> Migration:
+    """Bring the store up to the head revision and report where it started and ended."""
     cfg = Config(str(ALEMBIC_INI))
     # ConfigParser interpolates "%", so escape it in case the checkout path has one.
     cfg.set_main_option("script_location", str(MIGRATIONS_DIR).replace("%", "%%"))
     try:
         with engine.begin() as conn:
+            before = MigrationContext.configure(conn).get_current_revision()
             cfg.attributes["connection"] = conn
             alembic.command.upgrade(cfg, "head")
             revision = MigrationContext.configure(conn).get_current_revision()
@@ -81,7 +100,7 @@ def migrate(engine: Engine) -> str:
         raise StartupError(f"migration failed: {_reason(exc)}") from exc
     if revision is None:
         raise StartupError("migration failed: no schema revision after upgrade")
-    return revision
+    return Migration(before=before, revision=revision)
 
 
 def vector_smoke_check(engine: Engine) -> str:

@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import Engine, text
 
 from app.db import (
+    Migration,
     StartupError,
     create_db_engine,
     migrate,
@@ -83,9 +84,11 @@ def engine(database_path: Path) -> Iterator[Engine]:
 
 
 def test_migrate_fresh_store_to_head(engine: Engine, database_path: Path) -> None:
-    revision = migrate(engine)
+    migration = migrate(engine)
 
-    assert revision == "0001_baseline"
+    assert migration.before is None
+    assert migration.revision == "0001_baseline"
+    assert migration.summary == "Database created at schema revision 0001_baseline."
     with closing(sqlite3.connect(database_path)) as conn:
         rows = conn.execute("SELECT version_num FROM alembic_version").fetchall()
     assert rows == [("0001_baseline",)]
@@ -101,14 +104,22 @@ def test_restart_reuses_store(engine: Engine, database_path: Path) -> None:
 
     restarted = create_db_engine(database_path)
     try:
-        revision = migrate(restarted)
+        migration = migrate(restarted)
     finally:
         restarted.dispose()
 
-    assert revision == "0001_baseline"
+    assert migration.before == migration.revision == "0001_baseline"
+    assert migration.summary == "Database schema already at head (0001_baseline)."
     assert database_path.stat().st_ino == inode_before
     with closing(sqlite3.connect(database_path)) as conn:
         assert conn.execute("SELECT value FROM sentinel").fetchall() == [("kept",)]
+
+
+def test_migration_summary_names_both_revisions() -> None:
+    migration = Migration(before="0001_baseline", revision="0002_documents")
+
+    expected = "Database migrated from 0001_baseline to 0002_documents."
+    assert migration.summary == expected
 
 
 def test_migration_failure_stops_startup(

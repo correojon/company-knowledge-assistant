@@ -77,6 +77,8 @@ load settings ──invalid──▶ exit(2) with one line per faulty setting
 prepare data dir ──not writable──▶ exit(1) "data directory … is not writable"
      │
 migrate to head ──error──▶ exit(1) with reason
+     │ prints one line: "Database created at schema revision …",
+     │ "Database migrated from … to …" or "Database schema already at head (…)"
      │
 vector smoke check ──error──▶ exit(1) "vector search unavailable: …"
      │

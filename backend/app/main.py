@@ -20,6 +20,7 @@ class AppState:
 
     engine: Engine
     schema_revision: str
+    migration_summary: str
     vec_version: str
     provider: LLMProvider
     availability: AvailabilityCache
@@ -33,7 +34,7 @@ def startup(settings: Settings, provider: LLMProvider | None = None) -> AppState
     prepare_data_dir(settings.data_dir)
     engine = create_db_engine(settings.database_path)
     try:
-        schema_revision = migrate(engine)
+        migration = migrate(engine)
         vec_version = vector_smoke_check(engine)
     except BaseException:
         engine.dispose()
@@ -42,7 +43,8 @@ def startup(settings: Settings, provider: LLMProvider | None = None) -> AppState
         provider = build_provider(settings)
     return AppState(
         engine=engine,
-        schema_revision=schema_revision,
+        schema_revision=migration.revision,
+        migration_summary=migration.summary,
         vec_version=vec_version,
         provider=provider,
         availability=AvailabilityCache(provider),
