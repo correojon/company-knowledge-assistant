@@ -6,10 +6,14 @@ network guard does not affect it.
 
 import os
 import socket
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 # Every key in contracts/configuration.md. Values inherited from the shell or from a
 # developer's environment must never reach a test.
@@ -82,3 +86,27 @@ def _offline_test_environment(
     monkeypatch.setattr(config, "ENV_FILE", tmp_path / "no-such-dir" / ".env")
 
     yield
+
+
+@pytest.fixture
+def app_factory(tmp_path: Path) -> Callable[..., "FastAPI"]:
+    """Build an app on the fake provider with its store under ``tmp_path``.
+
+    Keyword arguments override ``Settings`` fields; ``provider`` and ``state`` are
+    passed to ``create_app``.
+    """
+    from app.config import Settings
+    from app.main import create_app
+
+    def make(
+        *, provider: object = None, state: object = None, **overrides: object
+    ) -> "FastAPI":
+        fields: dict[str, object] = {
+            "llm_provider": "fake",
+            "data_dir": tmp_path / "data",
+        }
+        fields.update(overrides)
+        settings = Settings(_env_file=None, **fields)
+        return create_app(settings, state=state, provider=provider)
+
+    return make

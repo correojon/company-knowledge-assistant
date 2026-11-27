@@ -1,14 +1,16 @@
-"""Startup building blocks: data directory, engine, migrations, vector check (R8)."""
+"""Startup: data directory, engine, migrations, vector check and app lifespan (R8)."""
 
 import os
 import sqlite3
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import closing
 from pathlib import Path
 
 import alembic.command
 import pytest
 import sqlite_vec
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 from sqlalchemy import Engine, text
 
 from app.db import (
@@ -17,6 +19,16 @@ from app.db import (
     migrate,
     prepare_data_dir,
     vector_smoke_check,
+)
+from app.llm.base import AvailabilityCache
+from app.llm.fake import FakeProvider
+from app.main import AppState
+
+AppFactory = Callable[..., FastAPI]
+
+skip_if_root = pytest.mark.skipif(
+    hasattr(os, "geteuid") and os.geteuid() == 0,
+    reason="root ignores directory permissions",
 )
 
 
@@ -29,10 +41,7 @@ def test_prepare_data_dir_creates_missing_dir(tmp_path: Path) -> None:
     assert list(data_dir.iterdir()) == []
 
 
-@pytest.mark.skipif(
-    hasattr(os, "geteuid") and os.geteuid() == 0,
-    reason="root ignores directory permissions",
-)
+@skip_if_root
 def test_unwritable_data_dir_fails(tmp_path: Path) -> None:
     data_dir = tmp_path / "readonly"
     data_dir.mkdir()
@@ -150,3 +159,52 @@ def test_vector_smoke_check_leaves_nothing_behind(
     with closing(sqlite3.connect(database_path)) as conn:
         names = conn.execute("SELECT name FROM sqlite_master").fetchall()
     assert ("vec_smoke",) not in names
+
+
+def test_startup_creates_store_and_passes_smoke(
+    app_factory: AppFactory, tmp_path: Path
+) -> None:
+    app = app_factory()
+
+    with TestClient(app):
+        assert (tmp_path / "data" / "knowledge.sqlite3").is_file()
+        state = app.state.app_state
+        assert isinstance(state, AppState)
+        assert state.schema_revision == "0001_baseline"
+        assert state.vec_version
+        assert isinstance(state.provider, FakeProvider)
+        assert isinstance(state.availability, AvailabilityCache)
+
+
+@skip_if_root
+def test_startup_failure_propagates(app_factory: AppFactory, tmp_path: Path) -> None:
+    readonly = tmp_path / "readonly"
+    readonly.mkdir()
+    readonly.chmod(0o500)
+    app = app_factory(data_dir=readonly / "data")
+    try:
+        with pytest.raises(StartupError, match="is not writable"), TestClient(app):
+            pass
+    finally:
+        readonly.chmod(0o700)
+
+
+def test_given_state_skips_startup(
+    app_factory: AppFactory, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app import main
+    from app.config import Settings
+
+    state = main.startup(
+        Settings(_env_file=None, llm_provider="fake", data_dir=tmp_path / "data")
+    )
+
+    def no_startup(*_: object, **__: object) -> AppState:
+        raise AssertionError("startup must not run when state is given")
+
+    monkeypatch.setattr(main, "startup", no_startup)
+    app = app_factory(state=state)
+
+    with TestClient(app):
+        assert app.state.app_state is state
+    state.engine.dispose()

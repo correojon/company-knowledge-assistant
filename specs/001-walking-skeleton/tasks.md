@@ -154,7 +154,7 @@ Web application: `backend/` (FastAPI package at `backend/app/`, tests at `backen
   - `test_vector_load_failure_stops_startup`: with `sqlite_vec.load` monkeypatched to raise, it raises `StartupError("vector search unavailable: …")`.
 
   **Implement** `vector_smoke_check(engine) -> str` in backend/app/db.py. It reads `SELECT vec_version()`. It then creates `temp.vec_smoke USING vec0(embedding float[4])`, inserts 3 vectors, asserts the expected nearest neighbour with a KNN `MATCH` query and drops the table. Any failure, extension loading included, becomes a `StartupError`.
-- [ ] T013 [US1] Application factory and startup sequence (data-model.md "Startup" state transitions). **Test first**, in backend/tests/integration/test_startup.py:
+- [X] T013 [US1] Application factory and startup sequence (data-model.md "Startup" state transitions). **Test first**, in backend/tests/integration/test_startup.py:
   - `test_startup_creates_store_and_passes_smoke`: run `create_app(settings)` inside a `TestClient` context. The DB file exists, and `app.state` holds the schema revision and vec version.
   - `test_startup_failure_propagates`: with an unwritable `data_dir`, a `StartupError` is raised.
 
