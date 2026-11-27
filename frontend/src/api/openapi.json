@@ -1,0 +1,139 @@
+{
+  "components": {
+    "schemas": {
+      "DatabaseStatus": {
+        "properties": {
+          "schema_revision": {
+            "title": "Schema Revision",
+            "type": "string"
+          },
+          "status": {
+            "const": "ok",
+            "title": "Status",
+            "type": "string"
+          },
+          "vector_search": {
+            "const": "ok",
+            "title": "Vector Search",
+            "type": "string"
+          },
+          "vector_search_version": {
+            "title": "Vector Search Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "schema_revision",
+          "vector_search",
+          "vector_search_version"
+        ],
+        "title": "DatabaseStatus",
+        "type": "object"
+      },
+      "HealthReport": {
+        "properties": {
+          "database": {
+            "$ref": "#/components/schemas/DatabaseStatus"
+          },
+          "llm": {
+            "$ref": "#/components/schemas/LLMStatus"
+          },
+          "status": {
+            "const": "ok",
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "version",
+          "database",
+          "llm"
+        ],
+        "title": "HealthReport",
+        "type": "object"
+      },
+      "LLMStatus": {
+        "properties": {
+          "checked_at": {
+            "format": "date-time",
+            "title": "Checked At",
+            "type": "string"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "provider": {
+            "enum": [
+              "fake",
+              "ollama",
+              "openai_compat"
+            ],
+            "title": "Provider",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "status": {
+            "enum": [
+              "available",
+              "unavailable"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider",
+          "model",
+          "status",
+          "reason",
+          "checked_at"
+        ],
+        "title": "LLMStatus",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Knowledge Assistant",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/health": {
+      "get": {
+        "description": "Always 200 while serving. The llm section comes from the cached check.",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthReport"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Backend, data store and language model status"
+      }
+    }
+  }
+}

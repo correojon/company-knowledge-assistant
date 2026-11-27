@@ -1,0 +1,101 @@
+openapi: 3.1.0
+info:
+  title: Knowledge Assistant API (Feature 001 subset)
+  version: 0.1.0
+  description: >
+    Design contract for the health endpoint. The backend's generated OpenAPI schema
+    (frontend/src/api/openapi.json) is the source of truth once implemented; it must stay
+    compatible with this document.
+paths:
+  /api/health:
+    get:
+      operationId: getHealth
+      summary: Backend, data store and language model status
+      description: >
+        Always returns 200 while the process is serving. The llm section comes from a
+        lightweight availability check cached for 60 seconds; calling this endpoint never
+        triggers text generation. Contains no secrets.
+      responses:
+        "200":
+          description: Health report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthReport"
+              examples:
+                localModelAvailable:
+                  value:
+                    status: ok
+                    version: 0.1.0
+                    database:
+                      status: ok
+                      schema_revision: 0001_baseline
+                      vector_search: ok
+                      vector_search_version: v0.1.9
+                    llm:
+                      provider: ollama
+                      model: llama3.2:3b
+                      status: available
+                      reason: null
+                      checked_at: "2026-11-27T10:15:00Z"
+                localModelNotRunning:
+                  value:
+                    status: ok
+                    version: 0.1.0
+                    database:
+                      status: ok
+                      schema_revision: 0001_baseline
+                      vector_search: ok
+                      vector_search_version: v0.1.9
+                    llm:
+                      provider: ollama
+                      model: llama3.2:3b
+                      status: unavailable
+                      reason: "cannot reach http://host.docker.internal:11434 (is Ollama running?)"
+                      checked_at: "2026-11-27T10:15:00Z"
+components:
+  schemas:
+    HealthReport:
+      type: object
+      required: [status, version, database, llm]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        version:
+          type: string
+        database:
+          $ref: "#/components/schemas/DatabaseStatus"
+        llm:
+          $ref: "#/components/schemas/LLMStatus"
+    DatabaseStatus:
+      type: object
+      required: [status, schema_revision, vector_search, vector_search_version]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        schema_revision:
+          type: string
+        vector_search:
+          type: string
+          enum: [ok]
+        vector_search_version:
+          type: string
+    LLMStatus:
+      type: object
+      required: [provider, model, status, reason, checked_at]
+      properties:
+        provider:
+          type: string
+          enum: [fake, ollama, openai_compat]
+        model:
+          type: string
+        status:
+          type: string
+          enum: [available, unavailable]
+        reason:
+          type: [string, "null"]
+        checked_at:
+          type: string
+          format: date-time
